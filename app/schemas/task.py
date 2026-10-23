@@ -1,5 +1,7 @@
 from pydantic import BaseModel, Field, ConfigDict
 from datetime import datetime
+from pydantic.error_wrappers import ValidationError
+
 
 
 # Pydantic schemas (used for validation and serialization)
@@ -23,6 +25,7 @@ class TaskResponse(BaseModel):
     created_at: datetime
     
     model_config = ConfigDict(from_attributes=True)
+
 
 
 # NOTE - ConfigDict is used to configure Pydantic models.

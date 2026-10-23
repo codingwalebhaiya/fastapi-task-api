@@ -29,20 +29,20 @@ DbSession = Annotated[Session, Depends(get_db)]
 
 
 @router.post("", response_model=TaskResponse, status_code=status.HTTP_201_CREATED)
-async def create_task(task_data: TaskCreate, db: DbSession):
+def create_task(task_data: TaskCreate, db: DbSession):
     task = Task(
-        title=task_data.title, description=task_data.description, completed=False
+    title=task_data.title, description=task_data.description, completed=False
     )
 
     db.add(task)
-    await db.commit()
-    await db.refresh(task)
+    db.commit()
+    db.refresh(task)
     return task
 
 
 @router.get("/{task_id}", response_model=TaskResponse)
-async def get_task(task_id: int, db: DbSession):
-    task = await db.get(Task, task_id)
+def get_task(task_id: int, db: DbSession):
+    task = db.get(Task, task_id)
 
     if task is None:
         raise HTTPException(
@@ -54,15 +54,15 @@ async def get_task(task_id: int, db: DbSession):
 
 
 @router.get("/list", response_model=list[TaskResponse])
-async def get_tasks(db: DbSession):
+def get_tasks(db: DbSession):
     statement = select(Task).order_by(Task.id.desc())
     result = db.scalars(statement).all()
     return result
 
 
 @router.delete("/{task_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_task(task_id: int, db: DbSession) -> Response:
-    task = await db.get(Task, task_id)
+def delete_task(task_id: int, db: DbSession) -> Response:
+    task = db.get(Task, task_id)
 
     if task is None:
         raise HTTPException(
@@ -70,18 +70,18 @@ async def delete_task(task_id: int, db: DbSession) -> Response:
             detail="Task not found",
         )
 
-    await db.delete(task)
-    await db.commit()
+    db.delete(task)
+    db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @router.patch("/{task_id}", response_model=TaskResponse)
-async def update_task(
+def update_task(
     task_id: int,
     task_data: TaskUpdate,
     db: DbSession,
 ):
-    task = await db.get(Task, task_id)
+    task = db.get(Task, task_id)
     if not task:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -92,6 +92,6 @@ async def update_task(
     task.description = task_data.description
     task.completed = task_data.completed
 
-    await db.commit()
-    await db.refresh(task)
+    db.commit()
+    db.refresh(task)
     return task
