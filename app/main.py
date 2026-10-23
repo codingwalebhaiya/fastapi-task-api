@@ -1,8 +1,10 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
-from app.db.base import Base 
+from app.db.base import Base
 from app.db.session import engine
-from  app.models.task import Task
+from app.models.task import Task
+from app.api.v1 import tasks_router
+
 
 # lifespan manages the lifecycle of the application
 # context manager is used to manage the state of the application
@@ -15,8 +17,13 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="Task Manager Api", description="API for managing tasks", version="1.0.0", lifespan=lifespan
+    title="Task Manager Api",
+    description="API for managing tasks",
+    version="1.0.0",
+    lifespan=lifespan,
 )
+
+app.include_router(tasks_router, prefix="/api/v1")
 
 
 @app.get("/")
